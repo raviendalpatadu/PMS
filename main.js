@@ -15,14 +15,14 @@ const url = require('url')
 // Copy paste fixed by this 
 
 app.on('ready', () => {
-//  createWindow() // commented for avoiding double window issue
+  //  createWindow() // commented for avoiding double window issue
   if (process.platform === 'darwin') {
     var template = [{
       label: 'FromScratch',
       submenu: [{
         label: 'Quit',
         accelerator: 'CmdOrCtrl+Q',
-        click: function() { app.quit(); }
+        click: function () { app.quit(); }
       }]
     }, {
       label: 'Edit',
@@ -63,13 +63,13 @@ app.on('ready', () => {
 const PHPServer = require('php-server-manager');
 
 const server = new PHPServer({
-  
-    port: 5555,
-    directory: __dirname,
-    directives: {
-        display_errors: 1,
-        expose_php: 1
-    }
+
+  port: 3000,
+  directory: __dirname,
+  directives: {
+    display_errors: 1,
+    expose_php: 1
+  }
 });
 
 //////////////////////////
@@ -78,24 +78,47 @@ const server = new PHPServer({
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function createWindow () {
+function createWindow() {
 
   server.run();
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
-
+  mainWindow = new BrowserWindow({
+    icon: 'lib/img/icons/32/graph.png',
+    webPreferences: {
+      nodeIntegration: true
+    },
+    /// show to false mean than the window will proceed with its lifecycle, but will not render until we will show it up
+    show: false,
+    backgroundColor: '#2e363f',
+    // titleBarStyle: 'hiddenInset'
+  })
   // and load the index.html of the app.
-  mainWindow.loadURL('http://'+server.host+':'+server.port+'/')
+  mainWindow.loadURL('http://' + server.host + ':' + server.port + '/')
+  mainWindow.setMenuBarVisibility(false)
+  mainWindow.maximize()
 
-/*
-mainWindow.loadURL(url.format({
-  pathname: path.join(__dirname, 'index.php'),
-  protocol: 'file:',
-  slashes: true
-}))
-*/
- const {shell} = require('electron')
- shell.showItemInFolder('fullPath')
+  /// keep listening on the did-finish-load event, when the mainWindow content has loaded
+  mainWindow.webContents.on('did-finish-load', () => {
+    /// then close the loading screen window and show the main window
+    if (loadingScreen) {
+      loadingScreen.close();
+    }
+    mainWindow.show();
+  });
+
+  // console.log(path.join(app.getAppPath(),"preload.js"));
+  /*
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'index.php'),
+    protocol: 'file:',
+    slashes: true
+  }))
+  */
+  // mainWindow.on('ready-to-show', function () {
+  //   mainWindow.show();
+  // });
+  const { shell } = require('electron')
+  //  shell.showItemInFolder('fullPath')
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -110,11 +133,41 @@ mainWindow.loadURL(url.format({
     mainWindow = null;
   })
 }
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow) // <== this is extra so commented, enabling this can show 2 windows..
+
+/// create a global var, wich will keep a reference to out loadingScreen window
+let loadingScreen;
+const createLoadingScreen = () => {
+  /// create a browser window
+  loadingScreen = new BrowserWindow(
+    Object.assign({
+      /// define width and height for the window
+      width: 600,
+      height: 400,
+      icon: 'lib/img/icons/32/graph.png',
+      /// remove the window frame, so it will become a frameless window
+      frame: false,
+      /// and set the transparency, to remove any window background color
+      transparent: false
+    })
+  );
+  loadingScreen.setResizable(false);
+  loadingScreen.loadURL(
+    'file://' + __dirname + '/loading.php'
+  );
+  loadingScreen.on('closed', () => (loadingScreen = null));
+  loadingScreen.webContents.on('did-finish-load', () => {
+    loadingScreen.show();
+  });
+};
+app.on('ready', function () {
+  createLoadingScreen();
+  setTimeout(() => {
+    createWindow();
+  },2000 );
+}) // <== this is extra so commented, enabling this can show 2 windows..
 
 // Quit when all windows are closed.
 app.on('window-all-closed', function () {

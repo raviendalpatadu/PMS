@@ -5,7 +5,6 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-
     "package-mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --no-asar --icon=icons/logo.icns --prune=true --out=release-builds",
     "package-win": "electron-packager . electron-tutorial-app --overwrite --no-asar --platform=win32 --arch=ia32 --icon=icons/logo.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Electron Tutorial App\"",
     "package-linux": "electron-packager . electron-tutorial-app --overwrite --no-asar --platform=linux --arch=x64 --icon=icons/logo.png --prune=true --out=release-builds"
@@ -23,6 +22,9 @@
     "electron-packager": "^11.0.1"
   },
   "dependencies": {
-    "php-server-manager": "^1.2.1"
+    "chart.js": "^3.2.1",
+    "electron-chartjs": "^1.0.0",
+    "php-server-manager": "^1.2.1",
+    "spin.js": "^4.1.0"
   }
 }

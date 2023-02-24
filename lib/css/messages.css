@@ -1,0 +1,10 @@
+.logout_message{
+    background-color: green;
+    color:white;
+    width: 82%;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    font-weight: bold;
+    font-family: sans-serif;
+}
